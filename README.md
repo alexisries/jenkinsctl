@@ -28,12 +28,15 @@ To load the credentials, two solutions are available to you:
 To start the program with environment variables, run this command: 
 
 ```shell
+$ export JENKIN_ADDR=http://jenkins.local
+$ export JENKINS_USER=jenkins_user
+$ export JENKINS_TOKEN=jenkins_token
 $ docker run --rm -it --name jenkinsctl \
-        -e JENKIN_ADDR=http://jenkins.local \
-        -e JENKINS_USER=jenkins_user \
-        -e JENKINS_TOKEN=jenkins_token \
+        -e JENKIN_ADDR -e JENKINS_USER -e JENKINS_TOKEN \
         jenkinsctl --help
 ```
+
+> **Tip**: For more security you can use [Hashicorp Vault](https://www.vaultproject.io/) to load the environment variables from a secure vault.
 
 ### Configuration in `.jenkinsctl.yaml`
 
@@ -114,6 +117,21 @@ To start the jobs on the Jenkins server, you can use the `jenkinsctl job start` 
 | `--maximum-age` | Filter jobs from last build maximum age (in minutes)                                                | `""`    |
 | `--schedule`    | Specify the schedule in Jenkins time trigger syntax                                                 | `""`    |
 | `--force`       | Do not ask for confirmation before starting                                                         | `false` |
+
+#### Schedule examples
+
+Here are some examples of schedules with the jenkins time trigger syntax :
+
+| Schedule             |  Description                                                               |
+| -------------------- |----------------------------------------------------------------------------|
+| `H * * * *`          | Build every hour                                                           |
+| `H/20 * * * *`       | Build every 20 minutes:                                                    |
+| `H/20 5-23 * * *`    | Build every 20 minutes 5am to 11pm                                         |
+| `H/20 8-18 * * 1-5`  | Build every 20 minutes, work time/days (8am-6pm, MON-FRI) only             |
+| `H * * * 1-3,5`      | Build every hour MON-WED and FRI only                                      |
+| `H * * 4,12 *`       | Build every hour, weekends in April and December                           |
+| `30 8 4 7 *`         | Build at 8.30am on July 4                                                  |
+| `H 8 * * *`          | Build every day at 8am                                                     |
 
 ### Stop jobs
 
