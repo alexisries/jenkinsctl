@@ -14,11 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package jobs
 
-import "jenkinsctl/pkg/cmd"
+import (
+	"fmt"
+	"jenkinsctl/pkg/apiclient"
+)
 
-func main() {
-	rootCmd := cmd.NewRootCmd()
-	cmd.Execute(rootCmd)
+func (jobs *Jobs) Stop(clt *apiclient.ApiClient, force bool) error {
+	fmt.Println("Stopping jobs...")
+	for _, job := range jobs.Jobs {
+		if !job.IsRunning {
+			fmt.Printf("job %s is already in stopped state\n", job.Name)
+			continue
+		}
+		isStopped, err := job.JenkinsLastBuild.Stop(clt.Ctx)
+		if err != nil {
+			return err
+		}
+		if isStopped {
+			fmt.Printf("job %s is now in stopped state\n", job.Name)
+		}
+	}
+	return nil
 }
