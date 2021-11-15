@@ -29,15 +29,13 @@ import (
 
 var cfgFile string
 
-var client apiclient.ApiClient
-
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute(rootCmd *cobra.Command) {
 	cobra.CheckErr(rootCmd.Execute())
 }
 
-func NewRootCmd() *cobra.Command {
+func NewRootCmd(client *apiclient.ApiClient) *cobra.Command {
 
 	cobra.OnInitialize(initConfig)
 	cobra.OnInitialize(client.Initialize)
@@ -54,7 +52,7 @@ This tool was developed as part of a technical challenge for Bonitasoft.`,
 		&cfgFile, "config", "", "config file (default is $HOME/.jenkinsctl.yaml)",
 	)
 
-	cmd.AddCommand(job.NewJobCmd(&client))
+	cmd.AddCommand(job.NewJobCmd(client))
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,

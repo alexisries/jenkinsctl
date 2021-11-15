@@ -16,9 +16,13 @@ limitations under the License.
 
 package main
 
-import "jenkinsctl/pkg/cmd"
+import (
+	"jenkinsctl/pkg/apiclient"
+	"jenkinsctl/pkg/cmd"
+)
 
 func main() {
-	rootCmd := cmd.NewRootCmd()
+	var client apiclient.ApiClient
+	rootCmd := cmd.NewRootCmd(&client)
 	cmd.Execute(rootCmd)
 }
