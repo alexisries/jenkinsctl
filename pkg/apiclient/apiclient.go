@@ -18,6 +18,7 @@ package apiclient
 
 import (
 	"context"
+	"errors"
 
 	"github.com/bndr/gojenkins"
 	"github.com/spf13/viper"
@@ -26,28 +27,55 @@ import (
 type ApiClient struct {
 	Jenkins      *gojenkins.Jenkins
 	Ctx          context.Context
-	ClientConfig ApiClientConfig
+	ClientConfig *ApiClientConfig
 }
 
 type ApiClientConfig struct {
+	address              string
+	username             string
+	token                string
 	MaxConcurentRequests int
 }
 
-func (clt *ApiClient) Initialize() {
-	viper.SetDefault("jenkins.addr", "localhost")
-	addr := viper.GetString("jenkins.addr")
-
-	username := viper.GetString("jenkins.user")
-	password := viper.GetString("jenkins.token")
+func (clt *ApiClient) getConfig() error {
 
 	viper.SetDefault("jenkins.max_concurent", 3)
-	clt.ClientConfig = ApiClientConfig{
+
+	clt.ClientConfig = &ApiClientConfig{
+		address:              viper.GetString("jenkins.addr"),
+		username:             viper.GetString("jenkins.user"),
+		token:                viper.GetString("jenkins.token"),
 		MaxConcurentRequests: viper.GetInt("jenkins.max_concurent"),
 	}
+	missingConfig := false
+	var errorMessage = "\n"
+	if clt.ClientConfig.address == "" {
+		missingConfig = true
+		errorMessage = errorMessage + "jenkins server address not defined\n"
+	}
+	if clt.ClientConfig.username == "" {
+		missingConfig = true
+		errorMessage = errorMessage + "jenkins server username not defined\n"
+	}
+	if clt.ClientConfig.token == "" {
+		missingConfig = true
+		errorMessage = errorMessage + "jenkins server token not defined\n"
+	}
+	if missingConfig {
+		return errors.New(errorMessage)
+	}
+	return nil
+}
+
+func (clt *ApiClient) Initialize() {
+	if err := clt.getConfig(); err != nil {
+		panic(err)
+	}
 	clt.Ctx = context.Background()
-	clt.Jenkins = gojenkins.CreateJenkins(nil, addr, username, password)
-	_, err := clt.Jenkins.Init(clt.Ctx)
-	if err != nil {
+	clt.Jenkins = gojenkins.CreateJenkins(
+		nil, clt.ClientConfig.address, clt.ClientConfig.username, clt.ClientConfig.token,
+	)
+	if _, err := clt.Jenkins.Init(clt.Ctx); err != nil {
 		panic(err)
 	}
 }

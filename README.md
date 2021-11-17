@@ -7,6 +7,14 @@ For the moment, only job management is implemented, so you can:
 - stop jobs with the same criteria as the listing
 - start jobs immediately or by scheduling it with Jenkins schedule syntax
 
+## Build
+
+To build this program with go, you can launch the `go build` command
+
+```shell
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o jenkinsctl pkg/main.go
+```
+
 ## Build with docker
 
 To build the client from source without having to install the `golang` development environment, you can create a docker image. 
@@ -28,12 +36,10 @@ To load the credentials, two solutions are available to you:
 To start the program with environment variables, run this command: 
 
 ```shell
-$ export JENKIN_ADDR=http://jenkins.local
+$ export JENKINS_ADDR=http://jenkins.local
 $ export JENKINS_USER=jenkins_user
 $ export JENKINS_TOKEN=jenkins_token
-$ docker run --rm -it --name jenkinsctl \
-        -e JENKIN_ADDR -e JENKINS_USER -e JENKINS_TOKEN \
-        jenkinsctl --help
+$ docker run --rm -it --name jenkinsctl -e JENKINS_ADDR -e JENKINS_USER -e JENKINS_TOKEN jenkinsctl --help
 ```
 
 > **Tip**: For more security you can use [Hashicorp Vault](https://www.vaultproject.io/) to load the environment variables from a secure vault.
